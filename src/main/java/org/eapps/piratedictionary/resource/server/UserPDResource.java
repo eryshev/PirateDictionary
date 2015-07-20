@@ -75,7 +75,8 @@ public class UserPDResource extends ServerResource {
 
         // Check if user is already existed
         String id = BASE_64.encode(userRep.getEmail().toCharArray(), false);
-        String secret = USER_PD_FACTORY.getSecretById(id);
+//        String secret = USER_PD_FACTORY.getSecretById(id);
+        String secret = "";
         System.out.println("SECRET=" + secret);
         if (secret != null) {
             getLogger().log(Level.WARNING, "This user is already existed.");

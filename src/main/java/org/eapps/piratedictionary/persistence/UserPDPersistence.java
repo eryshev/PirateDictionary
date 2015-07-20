@@ -20,7 +20,7 @@ public class UserPDPersistence {
     public UserPDPersistence() {
     }
 
-    public String getSecretById(String id) {
+    public String[] getSecretById(String id) {
         return ES.getSecretById(id);
     }
 

@@ -125,13 +125,16 @@ public class ElasticSearchDriver {
         }
     }
 
-    public String getSecretById(String id) {
+    public String[] getSecretById(String id) {
         GetResponse response = client.prepareGet(INDEX, SECRET_TYPE, id)
                 .execute()
                 .actionGet();
 
         try {
-            return response.getSource().get("secret").toString();
+            String[] responseArray = new String[2];
+            responseArray[0] = response.getSource().get("salt").toString();
+            responseArray[1] = response.getSource().get("secret").toString();
+            return responseArray;
         }
         catch (Exception ex) {
             return null;

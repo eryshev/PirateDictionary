@@ -35,7 +35,7 @@ public class PirateDictionaryAppRun {
         // Start the component.
         component.start();
 
-        Engine.setLogLevel(Level.FINER);
+//        Engine.setLogLevel(Level.FINER);
 
         PirateDictionaryApp.LOGGER.info("Pirate dictionary application started");
         PirateDictionaryApp.LOGGER.info("URL: http://localhost:8182" + PirateDictionaryApp.API_URL);
