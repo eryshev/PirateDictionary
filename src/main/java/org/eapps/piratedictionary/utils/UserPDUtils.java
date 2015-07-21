@@ -4,6 +4,8 @@ import org.eapps.piratedictionary.PirateDictionaryApp;
 import org.eapps.piratedictionary.persistence.entity.UserPD;
 import org.eapps.piratedictionary.representation.UserPDRepresentation;
 import org.eapps.piratedictionary.utils.exception.BadEntityException;
+import org.restlet.data.Status;
+import org.restlet.resource.ResourceException;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
@@ -44,5 +46,14 @@ public class UserPDUtils {
 
     public String getUserURL(String id) {
         return PirateDictionaryApp.API_URL + "/users/" + id;
+    }
+
+    public void checkIdAndSecret(String identifier, char[] secret) throws ResourceException {
+        if (identifier == null ||
+                identifier.equals("") ||
+                secret.length < 4
+                )
+            throw new ResourceException(Status.CLIENT_ERROR_NOT_ACCEPTABLE, "Authentication data is not correct. " +
+                    "Identificator shouldn't be null or empty and password should contain at least 4 symbols.");
     }
 }

@@ -24,11 +24,11 @@ public class UserPDPersistence {
         return ES.getSecretById(id);
     }
 
-    public UserPD putUserPD(UserPD userPD, String secretId) {
+    public UserPD putUserPD(UserPD userPD, String[] secret) {
         try {
             ES.putUserPD(MAPPER.writeValueAsString(userPD),
                     userPD.getId(),
-                    secretId);
+                    secret);
             return userPD;
         } catch (JsonProcessingException e) {
             e.printStackTrace();

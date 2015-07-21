@@ -2,6 +2,8 @@ package org.eapps.piratedictionary;
 
 import org.eapps.piratedictionary.resource.server.PingServerResource;
 import org.eapps.piratedictionary.resource.server.TermResource;
+import org.eapps.piratedictionary.resource.server.UserPDResource;
+import org.eapps.piratedictionary.security.CustomEnroler;
 import org.eapps.piratedictionary.security.PassVerifier;
 import org.restlet.Application;
 import org.restlet.Context;
@@ -31,15 +33,18 @@ public class PirateDictionaryApp extends Application {
     public static final Logger LOGGER = Engine.getLogger(PirateDictionaryApp.class);
 
     /**
-     * TODO
      * Roles definition
      */
-    public static final String ROLE_ADMIN = "admin";
-    public static final String ROLE_USER = "user";
+    public static final String ROLE_ADMIN_NAME = "admin";
+    public static final String ROLE_USER_NAME = "user";
+    public static Role ROLE_ADMIN;
+    public static Role ROLE_USER;
 
     public PirateDictionaryApp() {
-        getRoles().add(new Role(this, ROLE_ADMIN));
-        getRoles().add(new Role(this, ROLE_USER));
+        ROLE_ADMIN = new Role(this, ROLE_ADMIN_NAME);
+        ROLE_USER = new Role(this, ROLE_USER_NAME);
+        getRoles().add(ROLE_ADMIN);
+        getRoles().add(ROLE_USER);
     }
 
     public PirateDictionaryApp(Context context) {
@@ -60,8 +65,11 @@ public class PirateDictionaryApp extends Application {
         // Create the api router, protected by a guard
         ChallengeAuthenticator termsApiGuard = createTermsApiGuard();
 
-        // Add protected resource
-        router.attachDefault(termsApiGuard);
+        // Add protected terms resource
+        router.attach("/terms", termsApiGuard);
+
+        // Add protected users resource
+        router.attach("/users", createUsersApiGuard());
 
         return router;
     }
@@ -74,9 +82,6 @@ public class PirateDictionaryApp extends Application {
         Router router = new Router();
         router.attach("/ping", PingServerResource.class);
         router.attach("/", PingServerResource.class);
-        /*router.attach("/users/{userId}", UserPDResource.class);
-        router.attach("/users/", UserPDResource.class);
-        router.attach("/users", UserPDResource.class);*/
         return router;
     }
 
@@ -85,9 +90,20 @@ public class PirateDictionaryApp extends Application {
      */
     private Router createTermsApiRouter() {
         Router router = new Router(this.getContext());
-        router.attach("/terms/{termName}", TermResource.class);
-        router.attach("/terms", TermResource.class);
-        router.attach("/terms/", TermResource.class);
+        router.attach("/{termName}", TermResource.class);
+        router.attach("/", TermResource.class);
+        router.attach("", TermResource.class);
+        return router;
+    }
+
+    /** The users application resources, must be protected by a guard
+     * @return router's object that points to users application resources
+     */
+    private Router createUsersApiRouter() {
+        Router router = new Router(this.getContext());
+        router.attach("/{userId}", UserPDResource.class);
+        router.attach("/", UserPDResource.class);
+        router.attach("", UserPDResource.class);
         return router;
     }
 
@@ -104,17 +120,60 @@ public class PirateDictionaryApp extends Application {
         return methodAuth;
     }
 
+    /**
+     * Authorize PUT for anonymous users and GET, PUT, DELETE for
+     * authenticated users
+     */
+    private MethodAuthorizer createUsersMethodAuthorizer() {
+        MethodAuthorizer methodAuth = new MethodAuthorizer();
+        methodAuth.getAnonymousMethods().add(Method.PUT);
+        methodAuth.getAuthenticatedMethods().add(Method.GET);
+        methodAuth.getAuthenticatedMethods().add(Method.PUT);
+        methodAuth.getAuthenticatedMethods().add(Method.DELETE);
+        return methodAuth;
+    }
+
+    /**
+     * Create api guard for terms resource
+     * @return created guard
+     */
     private ChallengeAuthenticator createTermsApiGuard() {
         ChallengeAuthenticator apiGuard = new ChallengeAuthenticator(
                 getContext(), ChallengeScheme.HTTP_BASIC, "pirateDict");
 
         PassVerifier passVerifier = new PassVerifier();
-
         apiGuard.setVerifier(passVerifier);
+
+        CustomEnroler customEnroller = new CustomEnroler();
+        apiGuard.setEnroler(customEnroller);
+
         apiGuard.setOptional(true);
 
         MethodAuthorizer ma = createTermsMethodAuthorizer();
         ma.setNext(createTermsApiRouter());
+        apiGuard.setNext(ma);
+
+        return apiGuard;
+    }
+
+    /**
+     * Create api guard for users resource
+     * @return created guard
+     */
+    private ChallengeAuthenticator createUsersApiGuard() {
+        ChallengeAuthenticator apiGuard = new ChallengeAuthenticator(
+                getContext(), ChallengeScheme.HTTP_BASIC, "pirateDict");
+
+        PassVerifier passVerifier = new PassVerifier();
+        apiGuard.setVerifier(passVerifier);
+
+        CustomEnroler customEnroller = new CustomEnroler();
+        apiGuard.setEnroler(customEnroller);
+
+        apiGuard.setOptional(true);
+
+        MethodAuthorizer ma = createUsersMethodAuthorizer();
+        ma.setNext(createUsersApiRouter());
         apiGuard.setNext(ma);
 
         return apiGuard;

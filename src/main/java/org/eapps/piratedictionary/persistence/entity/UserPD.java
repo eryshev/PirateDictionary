@@ -6,8 +6,6 @@ package org.eapps.piratedictionary.persistence.entity;
  */
 public class UserPD {
     private String id;
-    private String login;
-    private String password;
     private String email;
     private String registrationDate;
     private String name;
@@ -16,10 +14,8 @@ public class UserPD {
     public UserPD() {
     }
 
-    public UserPD(String id, String login, String password, String email, String registrationDate, String name, String role) {
+    public UserPD(String id, String email, String registrationDate, String name, String role) {
         this.id = id;
-        this.login = login;
-        this.password = password;
         this.email = email;
         this.registrationDate = registrationDate;
         this.name = name;
@@ -34,13 +30,6 @@ public class UserPD {
         this.id = id;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 
     public String getEmail() {
         return email;
@@ -74,11 +63,4 @@ public class UserPD {
         this.role = role;
     }
 
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
 }

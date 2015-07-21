@@ -66,7 +66,7 @@ public class TermResource extends ServerResource {
         getLogger().finer("Add a term.");
 
         // Check authorization
-        RESOURCE_UTILS.checkRole(this, PirateDictionaryApp.ROLE_USER);
+        RESOURCE_UTILS.checkRole(this, PirateDictionaryApp.ROLE_USER_NAME);
         getLogger().finer("UserPD allowed to add a term.");
 
         // Business validation here
@@ -100,7 +100,7 @@ public class TermResource extends ServerResource {
         getLogger().finer("Delete a term.");
 
         // Check authorization
-        RESOURCE_UTILS.checkRole(this, PirateDictionaryApp.ROLE_ADMIN);
+        RESOURCE_UTILS.checkRole(this, PirateDictionaryApp.ROLE_ADMIN_NAME);
         getLogger().finer("UserPD allowed to delete a term.");
 
         //TODO check author

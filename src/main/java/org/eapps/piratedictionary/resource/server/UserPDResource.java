@@ -4,6 +4,8 @@ import org.eapps.piratedictionary.PirateDictionaryApp;
 import org.eapps.piratedictionary.persistence.UserPDPersistence;
 import org.eapps.piratedictionary.persistence.entity.UserPD;
 import org.eapps.piratedictionary.representation.UserPDRepresentation;
+import org.eapps.piratedictionary.security.SecurityUtils;
+import org.eapps.piratedictionary.utils.ResourceUtils;
 import org.eapps.piratedictionary.utils.UserPDUtils;
 import org.eapps.piratedictionary.utils.exception.UserExistsException;
 import org.restlet.data.Status;
@@ -13,6 +15,8 @@ import org.restlet.resource.Put;
 import org.restlet.resource.ServerResource;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.Date;
 import java.util.logging.Level;
 
@@ -27,6 +31,9 @@ public class UserPDResource extends ServerResource {
     private static final UserPDUtils USER_PD_UTILS = new UserPDUtils();
     private static final Base64 BASE_64 = new Base64();
     private static final UserPDPersistence USER_PD_FACTORY = new UserPDPersistence();
+    private static final ResourceUtils RESOURCE_UTILS = new ResourceUtils();
+    private static final SecurityUtils SECURITY_UTILS = new SecurityUtils();
+    private static final int SALT_BYTE_SIZE = 24;
 
     /**
      * Method called at the creation of the Resource (ie : each time the
@@ -55,6 +62,13 @@ public class UserPDResource extends ServerResource {
     public UserPDRepresentation retrieveUser() {
         getLogger().finer("Retrieve a user.");
 
+        // Check authorization
+        RESOURCE_UTILS.checkRole(this, PirateDictionaryApp.ROLE_USER_NAME);
+        getLogger().finer("UserPD allowed to delete a term.");
+
+        // Validation logic, take userId from authentication's token
+        userId = BASE_64.encode(getChallengeResponse().getIdentifier().toCharArray(), false);
+
         UserPDRepresentation userRep = USER_PD_UTILS.toUserRepresentation(
                 USER_PD_FACTORY.getUserPD(userId));
 
@@ -74,25 +88,39 @@ public class UserPDResource extends ServerResource {
         USER_PD_UTILS.validate(userRep);
 
         // Check if user is already existed
-        String id = BASE_64.encode(userRep.getEmail().toCharArray(), false);
-//        String secret = USER_PD_FACTORY.getSecretById(id);
-        String secret = "";
-        System.out.println("SECRET=" + secret);
+        String id = BASE_64.encode(getChallengeResponse().getIdentifier().toCharArray(), false);
+        String[] secret = USER_PD_FACTORY.getSecretById(id);
+
         if (secret != null) {
             getLogger().log(Level.WARNING, "This user is already existed.");
             throw new UserExistsException("This user is already existed.");
         }
 
-        secret = getChallengeResponse().getRawValue();
+        // Validate authentication data
+        USER_PD_UTILS.checkIdAndSecret(getChallengeResponse().getIdentifier(), getChallengeResponse().getSecret());
+
+        // Generate a random salt
+        SecureRandom random = new SecureRandom();
+        byte[] salt = new byte[SALT_BYTE_SIZE];
+        random.nextBytes(salt);
+
+        salt = SECURITY_UTILS.toHex(salt);
+        secret = new String[2];
+        secret[0] = new String(salt);
+
+        SECURITY_UTILS.MESSAGE_DIGEST.update((secret[0] + new String(getChallengeResponse().getSecret()))
+                .getBytes(StandardCharsets.UTF_8));
+
+        secret[1] = new String(SECURITY_UTILS.toHex(SECURITY_UTILS.MESSAGE_DIGEST.digest()));
+
         UserPD user = new UserPD(
                 id,
-                getChallengeResponse().getIdentifier(),
-                secret,
                 userRep.getEmail(),
                 USER_PD_UTILS.formatter.format(new Date()),
                 userRep.getName(),
-                PirateDictionaryApp.ROLE_USER
-                );
+                PirateDictionaryApp.ROLE_USER_NAME
+        );
+
 
         userRep = USER_PD_UTILS.toUserRepresentation(USER_PD_FACTORY.putUserPD(user, secret));
 

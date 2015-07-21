@@ -141,35 +141,21 @@ public class ElasticSearchDriver {
         }
     }
 
-    public String getSecretString(String userId) {
-        return "{\"secret\":\"" + userId + "\"}";
+    public String getSecretString(String[] secret) {
+        return "{\"salt\":\"" + secret[0] + "\"," +
+                "\"secret\":\"" + secret[1] + "\"}";
     }
 
-    public void putUserPD(String userString, String userId, String secretId) {
+    public void putUserPD(String userString, String userId, String[] secret) {
         BulkRequestBuilder bulkRequest = client.prepareBulk();
 
         bulkRequest.add(client.prepareIndex(INDEX, USER_TYPE, userId).setSource(userString))
-                .add(client.prepareIndex(INDEX, SECRET_TYPE, secretId).setSource(getSecretString(userId)));
+                .add(client.prepareIndex(INDEX, SECRET_TYPE, userId).setSource(getSecretString(secret)));
         BulkResponse bulkResponse = bulkRequest.execute().actionGet();
 
         if (bulkResponse.hasFailures()) {
             //TODO handle this case;
         }
-    }
-
-    public Object getSecretById(String secretId, String userId) {
-        /*GetResponse response = client.prepareGet(INDEX, SECRET_TYPE, secretId)
-                .execute()
-                .actionGet();
-
-        if (response.isExists()) {
-            if (response.getField("secret").getValue().toString().equals(userId)) {
-                return null;
-            }
-            else throw new Una
-        } else return null;*/
-
-        return null;
     }
 
     public byte[] getUserById(String userId) {
