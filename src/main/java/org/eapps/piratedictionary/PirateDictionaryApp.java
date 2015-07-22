@@ -33,6 +33,7 @@ public class PirateDictionaryApp extends Application {
     public static final Logger LOGGER = Engine.getLogger(PirateDictionaryApp.class);
 
     /**
+     * //TODO Now, ROLE_ADMIN doesn't include ROLE_USER, do it.
      * Roles definition
      */
     public static final String ROLE_ADMIN_NAME = "admin";

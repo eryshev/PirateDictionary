@@ -56,4 +56,10 @@ public class UserPDUtils {
             throw new ResourceException(Status.CLIENT_ERROR_NOT_ACCEPTABLE, "Authentication data is not correct. " +
                     "Identificator shouldn't be null or empty and password should contain at least 4 symbols.");
     }
+
+    public void validateId(String id) {
+        if (id == null || id.equals(""))
+            throw new ResourceException(Status.CLIENT_ERROR_NOT_ACCEPTABLE, "User id is not correct." +
+                    "It shouldn't be null or empty.");
+    }
 }

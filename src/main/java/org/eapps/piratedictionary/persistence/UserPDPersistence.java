@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eapps.extern.ElasticSearchDriver;
 import org.eapps.piratedictionary.persistence.entity.UserPD;
-import org.eapps.piratedictionary.utils.exception.BadEntityException;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
 
@@ -43,5 +42,9 @@ public class UserPDPersistence {
             e.printStackTrace();
             throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Stored user is incorrect.");
         }
+    }
+
+    public void deleteUserPD(String userId) {
+        ES.deleteUser(userId);
     }
 }

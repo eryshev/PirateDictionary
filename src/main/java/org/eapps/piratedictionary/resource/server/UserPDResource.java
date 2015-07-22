@@ -10,6 +10,7 @@ import org.eapps.piratedictionary.utils.UserPDUtils;
 import org.eapps.piratedictionary.utils.exception.UserExistsException;
 import org.restlet.data.Status;
 import org.restlet.engine.util.Base64;
+import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.Put;
 import org.restlet.resource.ServerResource;
@@ -64,7 +65,7 @@ public class UserPDResource extends ServerResource {
 
         // Check authorization
         RESOURCE_UTILS.checkRole(this, PirateDictionaryApp.ROLE_USER_NAME);
-        getLogger().finer("UserPD allowed to delete a term.");
+        getLogger().finer("User allowed to get a user");
 
         // Validation logic, take userId from authentication's token
         userId = BASE_64.encode(getChallengeResponse().getIdentifier().toCharArray(), false);
@@ -133,28 +134,25 @@ public class UserPDResource extends ServerResource {
         getLogger().finer("User successfully added.");
         return userRep;
     }
-//
-//    @Deprecated
-//    @Post("json")
-//    public void storeTerm(ArrayList<Object> termsAsObject) {
-//        TERMS_FACTORY.storeTerm(termsAsObject);
-//    }
-//
-//    /**
-//     * Method called to handle DELETE requests.
-//     */
-//    @Delete
-//    public void removeTerm(Term.PrimaryKey termKey) {
-//        getLogger().finer("Delete a term.");
-//
-//        // Check authorization
-//        RESOURCE_UTILS.checkRole(this, PirateDictionaryApp.ROLE_ADMIN);
-//        getLogger().finer("UserPD allowed to delete a term.");
-//
-//        //TODO check author
-//        TERMS_FACTORY.removeTerm(termKey);
-//
-//        getLogger().finer("Term successfully deleted.");
-//    }
+
+    /**
+     * Method called to handle DELETE requests.
+     */
+    @Delete
+    public void removeUser() {
+        getLogger().finer("Delete a user.");
+
+        // Check authorization
+        RESOURCE_UTILS.checkRole(this, PirateDictionaryApp.ROLE_ADMIN_NAME);
+        getLogger().finer("UserPD allowed to delete a user.");
+
+        // Business validation here
+        // Check UserPD
+        USER_PD_UTILS.validateId(userId);
+
+        USER_PD_FACTORY.deleteUserPD(userId);
+
+        getLogger().finer("User successfully deleted.");
+    }
 
 }

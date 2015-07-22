@@ -12,7 +12,6 @@ import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.search.SearchHit;
-import org.restlet.security.User;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -167,6 +166,21 @@ public class ElasticSearchDriver {
             return response.getSourceAsBytes();
         }
         else return null;
+    }
+
+    public void deleteUser(String userId) {
+        BulkRequestBuilder bulkRequest = client.prepareBulk();
+
+        bulkRequest.add(client.prepareDelete(INDEX, USER_TYPE, userId))
+                .add(client.prepareDelete(INDEX, SECRET_TYPE, userId));
+
+        BulkResponse bulkResponse = bulkRequest.execute().actionGet();
+
+        System.out.println(userId);
+
+        if (bulkResponse.hasFailures()) {
+            //TODO handle this case
+        }
     }
 
     public void close() {
