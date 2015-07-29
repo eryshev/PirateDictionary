@@ -1,10 +1,14 @@
 package org.eapps.piratedictionary;
 
+import org.restlet.Application;
 import org.restlet.Component;
 import org.restlet.data.Protocol;
 import org.restlet.engine.Engine;
+import org.restlet.service.CorsService;
 import org.restlet.service.LogService;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.logging.Level;
 
 /**
@@ -21,21 +25,23 @@ public class PirateDictionaryAppRun {
         component.getServers().add(Protocol.HTTP, 8182);
 
         //TODO looking for log configuration
-        /*// Declare client connector based on the classloader
-		c.getClients().add(Protocol.CLAP);
 
-		// Look for the log configuration file in the current classloader
-		c.getLogService().setLogPropertiesRef("clap:///logging.properties");
-        * */
+        // Add Cors service
+        CorsService corsService = new CorsService();
+        corsService.setAllowedOrigins(new HashSet<String>(Collections.singletonList("*")));
+        corsService.setAllowedCredentials(true);
+        corsService.setSkippingResourceForCorsOptions(true);
+        Application application = new PirateDictionaryApp();
+        application.getServices().add(corsService);
 
         // Attach the sample application.
         component.getDefaultHost().attach(PirateDictionaryApp.API_URL,
-                new PirateDictionaryApp());
+                application);
 
         // Start the component.
         component.start();
 
-//        Engine.setLogLevel(Level.FINER);
+        //Engine.setLogLevel(Level.FINER);
 
         PirateDictionaryApp.LOGGER.info("Pirate dictionary application started");
         PirateDictionaryApp.LOGGER.info("URL: http://localhost:8182" + PirateDictionaryApp.API_URL);

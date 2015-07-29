@@ -3,7 +3,7 @@ package org.eapps.piratedictionary;
 import org.eapps.piratedictionary.resource.server.PingServerResource;
 import org.eapps.piratedictionary.resource.server.TermResource;
 import org.eapps.piratedictionary.resource.server.UserPDResource;
-import org.eapps.piratedictionary.security.CustomEnroler;
+import org.eapps.piratedictionary.security.PirateEnroler;
 import org.eapps.piratedictionary.security.PassVerifier;
 import org.restlet.Application;
 import org.restlet.Context;
@@ -145,7 +145,7 @@ public class PirateDictionaryApp extends Application {
         PassVerifier passVerifier = new PassVerifier();
         apiGuard.setVerifier(passVerifier);
 
-        CustomEnroler customEnroller = new CustomEnroler();
+        PirateEnroler customEnroller = new PirateEnroler();
         apiGuard.setEnroler(customEnroller);
 
         apiGuard.setOptional(true);
@@ -168,7 +168,7 @@ public class PirateDictionaryApp extends Application {
         PassVerifier passVerifier = new PassVerifier();
         apiGuard.setVerifier(passVerifier);
 
-        CustomEnroler customEnroller = new CustomEnroler();
+        PirateEnroler customEnroller = new PirateEnroler();
         apiGuard.setEnroler(customEnroller);
 
         apiGuard.setOptional(true);

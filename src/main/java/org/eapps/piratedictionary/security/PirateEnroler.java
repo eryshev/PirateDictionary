@@ -10,12 +10,13 @@ import org.restlet.resource.ResourceException;
 import org.restlet.security.Enroler;
 import org.restlet.security.User;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 /**
  * Created by eryshev-alexey on 21/07/15.
  */
-public class CustomEnroler implements Enroler {
+public class PirateEnroler implements org.restlet.security.Enroler {
     private static final UserPDPersistence USER_PD_PERSISTENCE = new UserPDPersistence();
     private static final Base64 BASE_64 = new Base64();
 
@@ -25,7 +26,7 @@ public class CustomEnroler implements Enroler {
         try {
             UserPD userPD = USER_PD_PERSISTENCE.getUserPD(BASE_64.encode(authUser.getIdentifier().toCharArray(), false));
             if (userPD.getRole().equals("admin"))
-                clientInfo.setRoles(Collections.singletonList(PirateDictionaryApp.ROLE_ADMIN));
+                clientInfo.setRoles(Arrays.asList(PirateDictionaryApp.ROLE_ADMIN, PirateDictionaryApp.ROLE_USER));
             else if (userPD.getRole().equals("user"))
                 clientInfo.setRoles(Collections.singletonList(PirateDictionaryApp.ROLE_USER));
         } catch (Exception ex) {
